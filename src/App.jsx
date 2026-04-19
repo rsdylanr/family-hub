@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, CheckCircle, ShoppingCart, Clock, Plus, X, Bell } from 'lucide-react';
 
 export default function App() {
-  // State for different modules
+  // State for different modules.
   const [chores, setChores] = useState(() => JSON.parse(localStorage.getItem('chores')) || []);
   const [grocery, setGrocery] = useState(() => JSON.parse(localStorage.getItem('grocery')) || []);
   const [events, setEvents] = useState(() => JSON.parse(localStorage.getItem('events')) || []);
