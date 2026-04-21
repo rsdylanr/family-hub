@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Timer as TimerIcon, MessageSquareQuote } from 'lucide-react';
 
-// Import all the modular files you just created
+// Import names matched exactly to your screenshot
 import MartyTracker from './components/MartyTracker';
 import StockGrid from './components/StockGrid';
 import CleanStatus from './components/CleanStatus';
-import HomeTech from './components/HomeTech';
-import KitchenStatus from './components/KitchenStatus';
-import PersonalHealth from './components/PersonalHealth';
+import HomeRecords from './components/HomeRecords';
+import KitchenUtilities from './components/KitchenUtilities';
+import HealthSafety from './components/HealthSafety';
+import Wallet from './components/Wallet';
 import Schedule from './components/Schedule';
 import Routine from './components/Routine';
 import TimerOverlay from './components/TimerOverlay';
@@ -19,16 +20,14 @@ export default function App() {
   const [timerActive, setTimerActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   
-  // Data Persistence
   const [grocery, setGrocery] = useState(() => JSON.parse(localStorage.getItem('grocery')) || []);
   const [events, setEvents] = useState(() => JSON.parse(localStorage.getItem('events')) || []);
 
   const SCHOOL_LEAVE_TIME = "07:30";
 
-  // Clock and Inactivity Logic
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
-    let idleTimer = setTimeout(() => setIsIdle(true), 180000); // 3 minutes
+    let idleTimer = setTimeout(() => setIsIdle(true), 180000);
 
     const resetIdle = () => {
       setIsIdle(false);
@@ -47,13 +46,11 @@ export default function App() {
     };
   }, []);
 
-  // Sync Data to LocalStorage
   useEffect(() => {
     localStorage.setItem('grocery', JSON.stringify(grocery));
     localStorage.setItem('events', JSON.stringify(events));
   }, [grocery, events]);
 
-  // Timer Logic
   useEffect(() => {
     if (timerActive && timeLeft > 0) {
       const interval = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
@@ -63,7 +60,6 @@ export default function App() {
     }
   }, [timerActive, timeLeft]);
 
-  // School Morning Checks
   const isSchoolMorning = time.getHours() < 8 && time.getDay() !== 0 && time.getDay() !== 6;
   
   const getSchoolCountdown = () => {
@@ -78,9 +74,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#020202] text-white p-6 md:p-10 font-sans select-none overflow-x-hidden">
       
-      {/* 1. SCREENSAVER CLOCK */}
       {isIdle && !timerActive && (
-        <div onClick={() => setIsIdle(false)} className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center animate-in fade-in duration-700">
+        <div onClick={() => setIsIdle(false)} className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center">
           {isSchoolMorning && (
             <div className="mb-10 px-10 py-4 bg-red-600/20 border border-red-500 rounded-full text-red-500 font-black tracking-[0.4em] uppercase animate-pulse">
               TAKE YOUR PILLS
@@ -95,11 +90,9 @@ export default function App() {
         </div>
       )}
 
-      {/* 2. OVERLAYS */}
       {timerActive && <TimerOverlay seconds={timeLeft} onStop={() => setTimerActive(false)} />}
       {showRoutine && <Routine onClose={() => setShowRoutine(false)} />}
 
-      {/* 3. MAIN DASHBOARD */}
       <div className={`max-w-7xl mx-auto transition-all duration-1000 ${isIdle ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
         <header className="flex justify-between items-center mb-12">
           <div className="flex items-center gap-6">
@@ -111,24 +104,18 @@ export default function App() {
           <button onClick={() => setShowRoutine(true)} className="bg-blue-600 px-8 py-3 rounded-full font-bold shadow-lg shadow-blue-500/20 text-xs">MORNING ROUTINE</button>
         </header>
 
-        {/* TOP GRID: PRIMARY KITCHEN UTILITY */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
           <MartyTracker />
-          <KitchenStatus />
+          <KitchenUtilities />
           <CleanStatus />
         </div>
 
-        {/* MIDDLE GRID: HOME RECORDS & HEALTH */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-          <HomeTech />
-          <PersonalHealth />
-          <StockGrid grocery={grocery} onToggle={(item) => {
-            const next = grocery.includes(item) ? grocery.filter(i => i !== item) : [...grocery, item];
-            setGrocery(next);
-          }} />
+          <HomeRecords />
+          <HealthSafety />
+          <Wallet />
         </div>
 
-        {/* BOTTOM GRID: TIMERS & SCHEDULE */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <section className="bg-white/5 p-8 rounded-[2.5rem] border border-white/10">
             <h2 className="text-blue-400 font-bold mb-6 flex items-center gap-2"><TimerIcon size={20}/> Kitchen Timers</h2>
@@ -136,7 +123,10 @@ export default function App() {
               {[5, 15, 30].map(m => (
                 <button key={m} onClick={() => { setTimeLeft(m * 60); setTimerActive(true); }} className="py-4 bg-white/5 rounded-2xl border border-white/5 font-bold hover:bg-blue-500/20">{m}m</button>
               ))}
-              <button onClick={() => { const m = prompt("Minutes:"); if(m) { setTimeLeft(m*60); setTimerActive(true); }}} className="bg-blue-600/20 border border-blue-500/30 rounded-2xl font-bold">Custom</button>
+              <StockGrid grocery={grocery} onToggle={(item) => {
+                const next = grocery.includes(item) ? grocery.filter(i => i !== item) : [...grocery, item];
+                setGrocery(next);
+              }} />
             </div>
           </section>
 
@@ -149,10 +139,9 @@ export default function App() {
           </div>
         </div>
 
-        {/* FOOTER: FAMILY NOTE */}
-        <div className="mt-8 bg-blue-600/5 p-10 rounded-[3rem] border-2 border-dashed border-blue-500/20 flex flex-col items-center justify-center group cursor-pointer hover:bg-blue-600/10 transition-all">
+        <div className="mt-8 bg-blue-600/5 p-10 rounded-[3rem] border-2 border-dashed border-blue-500/20 flex flex-col items-center justify-center">
            <MessageSquareQuote size={20} className="text-blue-400 opacity-50 mb-2" />
-           <p className="text-2xl font-light text-slate-300 italic text-center">"Don't forget to take the trash out before school!"</p>
+           <p className="text-2xl font-light text-slate-300 italic text-center">"One Good Thing..."</p>
         </div>
       </div>
     </div>
